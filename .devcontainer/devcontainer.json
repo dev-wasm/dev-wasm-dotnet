@@ -1,0 +1,7 @@
+{
+    "name": "Dotnet WASM",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    }
+}
