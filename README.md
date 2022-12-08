@@ -13,7 +13,7 @@ Note this assumes that you have the VS code support for remote containers and `d
 on your machine.
 
 ```sh
-git clone https://github.com/brendandburns/dev-wasm-dotnet
+git clone https://github.com/dev-wasm/dev-wasm-dotnet
 cd dev-wasm-dotnet
 code ./
 ```
