@@ -24,5 +24,5 @@ Visual studio should prompt you to see if you want to relaunch the workspace in 
 
 ```sh
 dotnet build starter
-wasmtime starter/bin/Debug/net7.0/starter.wasm
+wasmtime --dir . starter/bin/Debug/net7.0/starter.wasm
 ```
