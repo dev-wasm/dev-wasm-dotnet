@@ -22,7 +22,16 @@ Visual studio should prompt you to see if you want to relaunch the workspace in 
 
 # Building and Running
 
+## Simple example
 ```sh
 dotnet build starter
 wasmtime --dir . starter/bin/Debug/net7.0/starter.wasm
+```
+
+## Web serving
+This uses the [WAGI](https://github.com/deislabs/wagi) to do WASM web serving.
+
+```sh
+dotnet build www
+wagi --config www/wagi.toml
 ```

@@ -1,0 +1,3 @@
+[[module]]
+route = "/..."
+module = "www/bin/Debug/net7.0/www.wasm"
