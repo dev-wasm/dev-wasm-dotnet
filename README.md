@@ -29,9 +29,11 @@ wasmtime --dir . starter/bin/Debug/net7.0/starter.wasm
 ```
 
 ## Web serving
-This uses the [WAGI](https://github.com/deislabs/wagi) to do WASM web serving.
+There is a simple example of web serving via WebAssembly + CGI (WAGI) in the www directory. It uses the lighttpd web server and mod_cgi. See the www/lighttpd.conf file for more details.
 
 ```sh
 dotnet build www
-wagi --config www/wagi.toml
+lighttpd -D -f www/lighttpd.conf 
 ```
+
+Once the server is running, VS Code or Codespaces should prompt you to connect to the open port.
