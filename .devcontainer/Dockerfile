@@ -1,4 +1,4 @@
-FROM brendanburns/wasm-dev-base:0.0.6
+FROM brendanburns/wasm-dev-base:0.0.7
 
 # Dotnet
 RUN apt install lld-14 -y -qq
