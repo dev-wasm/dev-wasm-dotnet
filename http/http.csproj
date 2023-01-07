@@ -5,8 +5,14 @@
       <TargetFramework>net7.0</TargetFramework>
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
-      <WasiTrim>true</WasiTrim>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
+
+    <ItemGroup>
+		  <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)\wasi_http.c" />
+		  <WasiAfterRuntimeLoaded Include="wasi_http_attach_internal_calls" />
+		</ItemGroup>
+
   
     <ItemGroup>
       <PackageReference Include="Wasi.Sdk" Version="0.1.3-preview.10012" />

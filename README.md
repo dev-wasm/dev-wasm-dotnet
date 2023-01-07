@@ -22,7 +22,22 @@ Visual studio should prompt you to see if you want to relaunch the workspace in 
 
 # Building and Running
 
+## Simple example
 ```sh
 dotnet build starter
 wasmtime --dir . starter/bin/Debug/net7.0/starter.wasm
 ```
+
+## Web serving
+There is a simple example of web serving via WebAssembly + CGI (WAGI) in the www directory. It uses the lighttpd web server and mod_cgi. See the www/lighttpd.conf file for more details.
+
+```sh
+dotnet build www
+lighttpd -D -f www/lighttpd.conf 
+```
+
+Once the server is running, VS Code or Codespaces should prompt you to connect to the open port.
+
+## HTTP Client
+There is a more complicated example in the [`http` directory](./http/) which shows an example 
+of making an HTTP client call using the experimental wasi+http support in [`wasmtime-http`](https://github.com/brendandburns/wasmtime).
