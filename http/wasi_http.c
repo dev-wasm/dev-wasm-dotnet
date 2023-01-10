@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <string.h>
 #include <mono-wasi/driver.h>
 #include "req.h"
@@ -67,7 +68,28 @@ MonoString* http_read_headers_all(int handle) {
     return mono_wasm_string_from_js(&buffer[0]);
 }
 
+void noop_settimeout(int timeout) {
+    // Not implemented
+}
+
+MonoMethod *threadpool_callback;
+
+void wasi_queuecallback() {
+    if (!threadpool_callback) {
+        threadpool_callback = lookup_dotnet_method("System.Private.CoreLib.dll", "System.Threading", "ThreadPool", "Callback", -1);
+        assert(threadpool_callback);
+    }
+
+    MonoObject* exception;
+    MonoObject* res = mono_wasm_invoke_method(threadpool_callback, NULL, NULL, &exception);
+    assert(!exception);
+}
+
 void wasi_http_attach_internal_calls() {
+    // Workaround lack of threading
+    mono_add_internal_call("System.Threading.TimerQueue::SetTimeout", noop_settimeout);
+    mono_add_internal_call("System.Threading.ThreadPool::QueueCallback", wasi_queuecallback);
+
     mono_add_internal_call("Wasi.Http.WasiHttpExperimental::Req", http_req);
     mono_add_internal_call("Wasi.Http.WasiHttpExperimental::Close", handle_close);
     mono_add_internal_call("Wasi.Http.WasiHttpExperimental::ReadBody", http_read_body);
