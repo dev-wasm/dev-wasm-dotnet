@@ -18,14 +18,13 @@ class HttpWasm {
         WasiHttpExperimental.Close(handle);
     }
 
-    unsafe static void Main(string[] args) {
+    static async Task Main(string[] args) {
         // lowLevel();
         
         // high level example.
         var client = new HttpClient(new WasiHttpHandler());
-        var task = client.GetAsync("https://postman-echo.com/get", System.Threading.CancellationToken.None);
-        task.Wait();
-        Console.WriteLine(task.Result);
+        var result = await client.GetAsync("https://postman-echo.com/get", System.Threading.CancellationToken.None);
+        Console.WriteLine(result);
     }
 }
 
