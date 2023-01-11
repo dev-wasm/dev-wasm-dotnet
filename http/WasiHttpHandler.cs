@@ -2,25 +2,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Security;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Wasi.Http
 {
-    // **Note** on `Task.ConfigureAwait(continueOnCapturedContext: true)` for the WebAssembly Browser.
-    // The current implementation of WebAssembly for the Browser does not have a SynchronizationContext nor a Scheduler
-    // thus forcing the callbacks to run on the main browser thread.  When threading is eventually implemented using
-    // emscripten's threading model of remote worker threads, via SharedArrayBuffer, any API calls will have to be
-    // remoted back to the main thread.  Most APIs only work on the main browser thread.
-    // During discussions the concensus has been that it will not matter right now which value is used for ConfigureAwait
-    // we should put this in place now.
     internal sealed class WasiHttpHandler : HttpMessageHandler
     {
         private static readonly HttpRequestOptionsKey<bool> EnableStreamingResponse = new HttpRequestOptionsKey<bool>("WebAssemblyEnableStreamingResponse");
@@ -30,7 +17,7 @@ namespace Wasi.Http
         private bool _isAllowAutoRedirectTouched;
 
         /// <summary>
-        /// Gets whether the current Browser supports streaming responses
+        /// Gets whether the current environment supports streaming responses
         /// </summary>
         private static bool StreamingSupported { get; } = GetIsStreamingSupported();
         private static bool GetIsStreamingSupported() { return false; }
@@ -83,6 +70,7 @@ namespace Wasi.Http
             set => throw new PlatformNotSupportedException();
         }
 
+        // TODO: This doesn't currently do anything...
         public bool AllowAutoRedirect
         {
             get => _allowAutoRedirect;
@@ -128,13 +116,94 @@ namespace Wasi.Http
         {
             int statusCode;
             int handle;
+            string body = "";
+            string headers = "";
+            int headerCount = request.Headers.Count() + request.Content?.Headers.Count() ?? 0;
+
+            if (request.Content != null)
+            {
+                body = await request.Content.ReadAsStringAsync();
+            }
+
+            if (request.RequestUri == null || request.Method == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            List<string> headerList = new List<string>(headerCount);
+
+            foreach (KeyValuePair<string, IEnumerable<string>> header in request.Headers)
+            {
+                foreach (string value in header.Value)
+                {
+                    headerList.Add(header.Key + ": " + value);
+                }
+            }
+
+            if (request.Content != null)
+            {
+                foreach (KeyValuePair<string, IEnumerable<string>> header in request.Content.Headers)
+                {
+                    foreach (string value in header.Value)
+                    {
+                        headerList.Add(header.Key + ": " + value);
+                    }
+                }
+            }
+
+            headers = String.Join("\n", headerList);
+
             unsafe
             {
-                WasiHttpExperimental.HttpError err = WasiHttpExperimental.Req(request.RequestUri.ToString(), request.Method.ToString(), "", "", &statusCode, &handle);
+                WasiHttpExperimental.HttpError err = WasiHttpExperimental.Req(request.RequestUri.ToString(), request.Method.ToString(), headers, body, &statusCode, &handle);
+                if (err != WasiHttpExperimental.HttpError.SUCCESS)
+                {
+                    throw new HttpRequestException(err.ToString());
+                }
+                headers = WasiHttpExperimental.ReadAllHeaders(handle);
+                body = WasiHttpExperimental.ReadBody(handle);
                 WasiHttpExperimental.Close(handle);
-                var response = new HttpResponseMessage((HttpStatusCode) statusCode);
-                return response;
             }
+
+            var response = new HttpResponseMessage((HttpStatusCode)statusCode);
+            var contentType = "";
+            var parts = headers.Split("\n");
+            foreach (var part in parts)
+            {
+                var pieces = part.Split(":", 2);
+                if (pieces.Length == 2)
+                {
+                    if (pieces[0].Equals("content-type", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        contentType = pieces[1];
+                    }
+                    else
+                    {
+                        response.Headers.TryAddWithoutValidation(pieces[0], pieces[1]);
+                    }
+                }
+            }
+            MediaTypeHeaderValue? contentHeader = null;
+            if (contentType.Length > 0)
+            {
+                try
+                {
+                    contentHeader = MediaTypeHeaderValue.Parse(contentType);
+                }
+                catch (System.FormatException ex)
+                {
+                    Console.WriteLine("Unparseable content: " + contentType + ex);
+                }
+            }
+            if (contentHeader != null)
+            {
+                response.Content = new StringContent(body, contentHeader);
+            }
+            else
+            {
+                response.Content = new StringContent(body);
+            }
+            return response;
         }
-   }
+    }
 }
