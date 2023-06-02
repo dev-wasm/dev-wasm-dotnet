@@ -112,6 +112,39 @@ namespace Wasi.Http
         private Dictionary<string, object?>? _properties;
         public IDictionary<string, object?> Properties => _properties ??= new Dictionary<string, object?>();
 
+
+        static WasiHttpExperimental.Scheme GetScheme(HttpRequestMessage request) {
+            switch (request.RequestUri!.Scheme) {
+                case "http": return WasiHttpExperimental.Scheme.HTTP;
+                case "https": return WasiHttpExperimental.Scheme.HTTPS;
+            }
+            throw new NotSupportedException($"Unknown scheme: {request.RequestUri.Scheme}");
+        }
+
+        static WasiHttpExperimental.Method GetMethod(HttpRequestMessage request) {
+            switch (request.Method.Method.ToUpper())
+            {
+            case "GET":
+                return WasiHttpExperimental.Method.GET;
+            case "POST":
+                return WasiHttpExperimental.Method.POST;
+            case "PUT":
+                return WasiHttpExperimental.Method.PUT;
+            case "DELETE":
+                return WasiHttpExperimental.Method.DELETE;
+            case "HEAD":
+                return WasiHttpExperimental.Method.HEAD;
+            case "OPTIONS":
+                return WasiHttpExperimental.Method.OPTIONS;
+            case "TRACE":
+                return WasiHttpExperimental.Method.TRACE;
+            case "CONNECT":
+                return WasiHttpExperimental.Method.CONNECT;
+            default:
+                throw new ArgumentException("Invalid HTTP method.");
+            }
+        }
+
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             int statusCode;
@@ -155,8 +188,11 @@ namespace Wasi.Http
 
             unsafe
             {
-                WasiHttpExperimental.HttpError err = WasiHttpExperimental.Req(request.RequestUri.ToString(), request.Method.ToString(), headers, body, &statusCode, &handle);
-                if (err != WasiHttpExperimental.HttpError.SUCCESS)
+                WasiHttpExperimental.Method method = GetMethod(request);
+                WasiHttpExperimental.Scheme scheme = GetScheme(request);
+
+                int err = WasiHttpExperimental.Req(method, scheme, request.RequestUri.Authority, request.RequestUri.LocalPath, request.RequestUri.Query, headers, body, &statusCode, &handle);
+                if (err != 0)
                 {
                     throw new HttpRequestException(err.ToString());
                 }

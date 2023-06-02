@@ -10,12 +10,18 @@
 
     <ItemGroup>
 		  <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)\wasi_http.c" />
+		  <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)\proxy.c" />
+		  <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)\proxy_component_type.o" />
 		  <WasiAfterRuntimeLoaded Include="wasi_http_attach_internal_calls" />
 		</ItemGroup>
 
+    <PropertyGroup>
+      <WasiRunnerArgs>--wasi-modules=experimental-wasi-http</WasiRunnerArgs>
+    </PropertyGroup>
+
   
     <ItemGroup>
-      <PackageReference Include="Wasi.Sdk" Version="0.1.3-preview.10012" />
+      <PackageReference Include="Wasi.Sdk" Version="0.1.4-preview.10020" />
     </ItemGroup>
   
   </Project>
