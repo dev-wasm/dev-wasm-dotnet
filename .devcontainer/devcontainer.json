@@ -1,9 +1,14 @@
 {
     "name": "Dotnet WASM",
     "image": "mcr.microsoft.com/dotnet/sdk:7.0",
-     "features": {
-        "devwasm.azurecr.io/dev-wasm/dev-wasm-feature/wasmtime-wasi:0.0.8": {
-            "version": "20"
+    "remoteEnv": {
+	"PATH": "${containerEnv:PATH}:/usr/local/lib/wasi-sdk-20.0/bin:/usr/local/lib"
+    },
+    "features": {
+        "devwasm.azurecr.io/dev-wasm/dev-wasm-feature/wasmtime-wasi:0.0.9": {
+            "version": "20",
+            "wasmtime_version": "v9.0.4",
+	    "wit_version": "0.4.0"
         },
         "ghcr.io/devcontainers/features/common-utils": {}
     },
