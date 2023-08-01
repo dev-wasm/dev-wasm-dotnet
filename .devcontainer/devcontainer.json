@@ -7,8 +7,8 @@
     "features": {
         "devwasm.azurecr.io/dev-wasm/dev-wasm-feature/wasmtime-wasi:0.0.9": {
             "version": "20",
-            "wasmtime_version": "v9.0.4",
-	    "wit_version": "0.4.0"
+            "wasmtime_version": "v11.0.1",
+	    "wit_version": "0.8.0"
         },
         "ghcr.io/devcontainers/features/common-utils": {}
     },

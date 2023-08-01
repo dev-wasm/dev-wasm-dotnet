@@ -191,7 +191,12 @@ namespace Wasi.Http
                 WasiHttpExperimental.Method method = GetMethod(request);
                 WasiHttpExperimental.Scheme scheme = GetScheme(request);
 
-                int err = WasiHttpExperimental.Req(method, scheme, request.RequestUri.Authority, request.RequestUri.LocalPath, request.RequestUri.Query, headers, body, &statusCode, &handle);
+                var pathWithQuery = request.RequestUri.LocalPath;
+                if (request.RequestUri.Query.Length > 0) {
+                    pathWithQuery = pathWithQuery + "?" + request.RequestUri.Query;
+                }
+
+                int err = WasiHttpExperimental.Req(method, scheme, request.RequestUri.Authority, pathWithQuery, headers, body, &statusCode, &handle);
                 if (err != 0)
                 {
                     throw new HttpRequestException(err.ToString());
