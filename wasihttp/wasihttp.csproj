@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <OutputType>library</OutputType>
+      <TargetFramework>net7.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <!--
+    <ItemGroup>
+		  <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)\wasi_http.c" />
+		  <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)\proxy.c" />
+		  <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)\proxy_component_type.o" />
+		  <WasiAfterRuntimeLoaded Include="wasi_http_attach_internal_calls" />
+		</ItemGroup>
+    -->
+
+    <ItemGroup>
+      <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Wasi.Sdk" Version="0.1.4-preview.10020" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <UpToDateCheckInput Include="native\*.c" />
+    </ItemGroup>
+
+    <Target Name="PackTaskDependencies" BeforeTargets="GenerateNuspec">
+      <ItemGroup>
+        <_PackageFiles Include="build\**" BuildAction="Content" PackagePath="build" />
+        <_PackageFiles Include="native\**" BuildAction="Content" PackagePath="native" />
+      </ItemGroup>
+    </Target>
+  
+  </Project>

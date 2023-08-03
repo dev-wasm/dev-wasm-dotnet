@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace Wasi.Http;
 
-internal class WasiHttpExperimental
+public class WasiHttpExperimental
 {
     public enum Scheme: int {
         HTTP = 0,
@@ -32,4 +32,7 @@ internal class WasiHttpExperimental
 
     [MethodImpl(MethodImplOptions.InternalCall)]
     public static extern void Close(int handle);
+
+    [MethodImpl(MethodImplOptions.InternalCall)]
+    public static extern void CreateResponse(uint handle, uint statusCode, string[] headers, string[] headerValues, string body);
 }

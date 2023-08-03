@@ -8,7 +8,7 @@ using System.Net.Security;
 
 namespace Wasi.Http
 {
-    internal sealed class WasiHttpHandler : HttpMessageHandler
+    public sealed class WasiHttpHandler : HttpMessageHandler
     {
         private static readonly HttpRequestOptionsKey<bool> EnableStreamingResponse = new HttpRequestOptionsKey<bool>("WebAssemblyEnableStreamingResponse");
         private static readonly HttpRequestOptionsKey<IDictionary<string, object>> FetchOptions = new HttpRequestOptionsKey<IDictionary<string, object>>("WebAssemblyFetchOptions");

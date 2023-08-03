@@ -28,8 +28,11 @@ dotnet build starter
 wasmtime --dir . starter/bin/Debug/net7.0/starter.wasm
 ```
 
-## Web serving
-There is a simple example of web serving via WebAssembly + CGI (WAGI) in the www directory. It uses the lighttpd web server and mod_cgi. See the www/lighttpd.conf file for more details.
+## Web serving with WASI-HTTP
+
+
+## Web serving with WAGI
+There is an example of web serving via WebAssembly + CGI (WAGI) in the www directory. It uses the lighttpd web server and mod_cgi. See the www/lighttpd.conf file for more details.
 
 ```sh
 dotnet build www
