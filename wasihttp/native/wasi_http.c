@@ -4,14 +4,6 @@
 #include "proxy.h"
 #include "dotnet_method.h"
 
-char buffer[1024];
-__attribute__((import_module("types"), import_name("log-it")))
-void _wasm_log(int32_t, int32_t);
-
-void send_log() {
-    _wasm_log((int32_t) buffer, strlen(buffer));
-}
-
 DEFINE_DOTNET_METHOD(serve_http, "wasihttp.dll", "", "Binder", "ServeHTTP");
 
 void print_headers(types_headers_t header_handle) {
@@ -25,8 +17,7 @@ void print_headers(types_headers_t header_handle) {
         name[header_list.ptr[i].f0.len] = 0;
         strncpy(value, (const char*)header_list.ptr[i].f1.ptr, header_list.ptr[i].f1.len);
         value[header_list.ptr[i].f1.len] = 0;
-        sprintf(buffer, "%s: %s\n", name, value);
-        send_log();
+        printf("%s: %s\n", name, value);
     }
 }
 
@@ -114,14 +105,12 @@ void create_response(uint32_t res, uint32_t status_code, MonoArray* headers, Mon
         },
     };
     if (!types_set_response_outparam(res, &res_err)) {
-        sprintf(buffer, "Failed to set response outparam: %d -> %d\n", res, response);
-        send_log();
+        printf("Failed to set response outparam: %d -> %d\n", res, response);
     }
 
     types_outgoing_stream_t stream;
     if (!types_outgoing_response_write(response, &stream)) {
-        sprintf(buffer, "Failed to get response\n");
-        send_log();
+        printf("Failed to get response\n");
     }
 
     streams_list_u8_t buf = {
