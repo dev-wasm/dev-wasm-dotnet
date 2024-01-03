@@ -1,8 +1,9 @@
 {
     "name": "Dotnet WASM",
-    "image": "mcr.microsoft.com/dotnet/sdk:7.0",
+    "image": "mcr.microsoft.com/dotnet/sdk:8.0",
     "remoteEnv": {
-	"PATH": "${containerEnv:PATH}:/usr/local/lib/wasi-sdk-20.0/bin:/usr/local/lib"
+	    "PATH": "${containerEnv:PATH}:/usr/local/lib/wasi-sdk-20.0/bin:/usr/local/lib",
+        "WASI_SDK_PATH": "/usr/local/lib/wasi-sdk-20.0"
     },
     "features": {
         "devwasm.azurecr.io/dev-wasm/dev-wasm-feature/wasmtime-wasi:0.0.13": {
