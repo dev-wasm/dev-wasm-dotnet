@@ -1,8 +1,15 @@
 using Wasi.Http;
 using System.Text;
+using Microsoft.AspNetCore.Builder;
 
+var builder = WebApplication.CreateBuilder(args).UseWasiServer();
+var app = builder.Build();
+app.MapGet("/", () => "Hello, world! See also: /api/getvalue/{key} and /api/setvalue/{key}/{value}");
+await app.StartAsync();
+
+/*
 public class HttpWasmServer {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         WasiMiddlewareHandler.Handler = (string authority, string path, string method) => {
             Console.WriteLine(path);
@@ -16,4 +23,5 @@ public class HttpWasmServer {
         };
     }
 }
+*/
  
