@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-      <WasiRunnerArgs>--wasi-modules=experimental-wasi-http</WasiRunnerArgs>
+      <WasiRunnerArgs>-S http --wasm component-model</WasiRunnerArgs>
     </PropertyGroup>
 
   

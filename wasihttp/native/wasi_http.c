@@ -1,14 +1,14 @@
 #include <assert.h>
 #include <string.h>
 #include <mono-wasi/driver.h>
-#include "proxy.h"
+#include "wasi.h"
 #include "dotnet_method.h"
 
 DEFINE_DOTNET_METHOD(serve_http, "wasihttp.dll", "", "Binder", "ServeHTTP");
 
-void print_headers(types_headers_t header_handle) {
-    types_list_tuple2_string_string_t header_list;
-    types_fields_entries(header_handle, &header_list);
+void print_headers(wasi_http_0_2_0_rc_2023_11_10_types_own_headers_t header_handle) {
+    wasi_http_0_2_0_rc_2023_11_10_types_list_tuple2_field_key_field_value_t header_list;
+    wasi_http_0_2_0_rc_2023_11_10_types_method_fields_entries(wasi_http_0_2_0_rc_2023_11_10_types_borrow_fields(header_handle), &header_list);
 
     for (int i = 0; i < header_list.len; i++) {
         char name[128];
@@ -21,24 +21,24 @@ void print_headers(types_headers_t header_handle) {
     }
 }
 
-const char* str_for_method(types_method_t method) {
+const char* str_for_method(wasi_http_0_2_0_rc_2023_11_10_types_method_t method) {
     switch (method.tag) {
-        case TYPES_METHOD_GET: return "GET";
-        case TYPES_METHOD_POST: return "POST";
-        case TYPES_METHOD_PUT: return "PUT";
-        case TYPES_METHOD_DELETE: return "DELETE";
-        case TYPES_METHOD_PATCH: return "PATCH";
-        case TYPES_METHOD_HEAD: return "HEAD";
-        case TYPES_METHOD_OPTIONS: return "OPTIONS";
-        case TYPES_METHOD_CONNECT: return "CONNECT";
-        case TYPES_METHOD_TRACE: return "TRACE";
+        case WASI_HTTP_0_2_0_RC_2023_11_10_TYPES_METHOD_GET: return "GET";
+        case WASI_HTTP_0_2_0_RC_2023_11_10_TYPES_METHOD_POST: return "POST";
+        case WASI_HTTP_0_2_0_RC_2023_11_10_TYPES_METHOD_PUT: return "PUT";
+        case WASI_HTTP_0_2_0_RC_2023_11_10_TYPES_METHOD_DELETE: return "DELETE";
+        case WASI_HTTP_0_2_0_RC_2023_11_10_TYPES_METHOD_PATCH: return "PATCH";
+        case WASI_HTTP_0_2_0_RC_2023_11_10_TYPES_METHOD_HEAD: return "HEAD";
+        case WASI_HTTP_0_2_0_RC_2023_11_10_TYPES_METHOD_OPTIONS: return "OPTIONS";
+        case WASI_HTTP_0_2_0_RC_2023_11_10_TYPES_METHOD_CONNECT: return "CONNECT";
+        case WASI_HTTP_0_2_0_RC_2023_11_10_TYPES_METHOD_TRACE: return "TRACE";
     }
     return "unknown";
 }
 
 static int count = 0;
 
-MonoString* mono_wasm_string_from_proxy_string(proxy_string_t str) {
+MonoString* mono_wasm_string_from_proxy_string(wasi_string_t str) {
     // This is broken, but it avoids dynamic allocation
     assert(str.len < 1024);
 
@@ -48,34 +48,34 @@ MonoString* mono_wasm_string_from_proxy_string(proxy_string_t str) {
     return mono_wasm_string_from_js(buff);
 }
 
-void http_handle(uint32_t req, uint32_t res) {
-    proxy_string_t authority;
-    types_incoming_request_authority(req, &authority);
+void exports_wasi_http_0_2_0_rc_2023_11_10_incoming_handler_handle(exports_wasi_http_0_2_0_rc_2023_11_10_incoming_handler_own_incoming_request_t req, exports_wasi_http_0_2_0_rc_2023_11_10_incoming_handler_own_response_outparam_t response_out) {
+    wasi_string_t authority;
+    wasi_http_0_2_0_rc_2023_11_10_types_method_incoming_request_authority(wasi_http_0_2_0_rc_2023_11_10_types_borrow_incoming_request(req), &authority);
     MonoString *authority_string = mono_wasm_string_from_proxy_string(authority);
     free(authority.ptr);
 
-    proxy_string_t path;
-    types_incoming_request_path(req, &path);
-    MonoString* path_string = mono_wasm_string_from_proxy_string(path);
-    free(path.ptr);
+    wasi_string_t path_query;
+    wasi_http_0_2_0_rc_2023_11_10_types_method_incoming_request_path_with_query(wasi_http_0_2_0_rc_2023_11_10_types_borrow_incoming_request(req), &path_query);
+    MonoString* path_string = mono_wasm_string_from_proxy_string(path_query);
+    free(path_query.ptr);
     
-    types_method_t method;
-    types_incoming_request_method(req, &method);
+    wasi_http_0_2_0_rc_2023_11_10_types_method_t method;
+    wasi_http_0_2_0_rc_2023_11_10_types_method_incoming_request_method(wasi_http_0_2_0_rc_2023_11_10_types_borrow_incoming_request(req), &method);
     MonoString* method_string = mono_wasm_string_from_js(str_for_method(method));
 
     // types_headers_t headers = types_incoming_request_headers(req);
     // print_headers(headers);
 
-    void* method_params[] = { &req, &res, authority_string, path_string, method_string };
+    void* method_params[] = { &req.__handle, &response_out.__handle, authority_string, path_string, method_string };
     serve_http(NULL, method_params);
 }
 
-void create_response(uint32_t res, uint32_t status_code, MonoArray* headers, MonoArray* header_values, MonoString* mono_body) {
+void create_response(uint32_t res_ptr, uint32_t status_code, MonoArray* headers, MonoArray* header_values, MonoString* mono_body) {
     const char* body = mono_wasm_string_get_utf8(mono_body);
 
     uint32_t header_count = mono_array_length(headers);
-    types_tuple2_string_string_t *header_arr = malloc(sizeof(types_tuple2_string_string_t) * header_count);
-    types_list_tuple2_string_string_t headers_list = {
+    wasi_http_0_2_0_rc_2023_11_10_types_tuple2_field_key_field_value_t *header_arr = malloc(sizeof(wasi_http_0_2_0_rc_2023_11_10_types_tuple2_field_key_field_value_t) * header_count);
+    wasi_http_0_2_0_rc_2023_11_10_types_list_tuple2_field_key_field_value_t headers_list = {
         .ptr = header_arr,
         .len = header_count,
     };
@@ -94,38 +94,50 @@ void create_response(uint32_t res, uint32_t status_code, MonoArray* headers, Mon
         // TODO there's definitely memory leaks here.
     }
 
-    types_fields_t out_headers = types_new_fields(&headers_list);
+    wasi_http_0_2_0_rc_2023_11_10_types_own_headers_t f;
+    wasi_http_0_2_0_rc_2023_11_10_types_header_error_t err;
+    wasi_http_0_2_0_rc_2023_11_10_types_static_fields_from_list(&headers_list, &f, &err);
 
-    types_outgoing_response_t response = types_new_outgoing_response(status_code, out_headers);
+    wasi_http_0_2_0_rc_2023_11_10_types_own_outgoing_response_t res = wasi_http_0_2_0_rc_2023_11_10_types_constructor_outgoing_response(f);
 
-    types_result_outgoing_response_error_t res_err = {
+    wasi_http_0_2_0_rc_2023_11_10_types_own_outgoing_body_t out_body;
+    wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_response_body(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_response(res), &body);
+
+    wasi_http_0_2_0_rc_2023_11_10_types_own_response_outparam_t outparam = {
+        .__handle = res_ptr,
+    };
+    wasi_http_0_2_0_rc_2023_11_10_types_result_own_outgoing_response_error_code_t res_err = {
         .is_err = false,
         .val = {
-            .ok = response,
+            .ok = res,
         },
     };
-    if (!types_set_response_outparam(res, &res_err)) {
-        printf("Failed to set response outparam: %d -> %d\n", res, response);
+    wasi_http_0_2_0_rc_2023_11_10_types_static_response_outparam_set(outparam, &res_err);
+    
+    if (!res_err.is_err) {
+        printf("Failed to set response outparam: %d -> %d\n", res_err.val.err, res);
     }
 
-    types_outgoing_stream_t stream;
-    if (!types_outgoing_response_write(response, &stream)) {
+    wasi_http_0_2_0_rc_2023_11_10_types_own_output_stream_t stream;
+    if (!wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_body_write(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_body(out_body), &stream)) {
         printf("Failed to get response\n");
     }
 
-    streams_list_u8_t buf = {
+    wasi_io_0_2_0_rc_2023_11_10_streams_list_u8_t buf = {
         .ptr = (uint8_t *) body,
         .len = strlen(body),
     };
-    uint64_t ret_val;
-    streams_write(stream, &buf, &ret_val, NULL);
+    wasi_io_0_2_0_rc_2023_11_10_streams_stream_error_t stream_err;
+    wasi_io_0_2_0_rc_2023_11_10_streams_method_output_stream_blocking_write_and_flush(wasi_io_0_2_0_rc_2023_11_10_streams_borrow_output_stream(stream), &buf, &stream_err);
 
-    types_drop_outgoing_response(res);
-    types_drop_fields(out_headers);
+    wasi_io_0_2_0_rc_2023_11_10_streams_output_stream_drop_own(stream);
+
+    wasi_http_0_2_0_rc_2023_11_10_types_error_code_t error_code;
+    wasi_http_0_2_0_rc_2023_11_10_types_static_outgoing_body_finish(out_body, NULL, &error_code);	
 }
 
-int request(uint8_t method_tag, uint8_t scheme_tag, const char * authority_str, const char* path_str, const char* query_str, const char* body, int *status_code, int *handle) {
-    types_tuple2_string_string_t content_type[] = {{
+int request(uint8_t method_tag, uint8_t scheme_tag, const char * authority_str, const char* path_query_str, const char* body, int *status_code, int *handle) {
+    wasi_http_0_2_0_rc_2023_11_10_types_tuple2_field_key_field_value_t content_type[] = {{
         .f0 = { .ptr = "User-agent", .len = 10 },
         .f1 = { .ptr = "WASI-HTTP/0.0.1", .len = 15},
     },
@@ -133,80 +145,102 @@ int request(uint8_t method_tag, uint8_t scheme_tag, const char * authority_str, 
         .f0 = { .ptr = "Content-type", .len = 12 },
         .f1 = { .ptr = "application/json", .len = 16},
     }};
-    types_list_tuple2_string_string_t headers_list = {
+    wasi_http_0_2_0_rc_2023_11_10_types_list_tuple2_field_key_field_value_t headers_list = {
         .ptr = &content_type[0],
         .len = 2,
     };
-    types_fields_t headers = types_new_fields(&headers_list);
-    types_method_t method = { .tag = method_tag };
-    types_scheme_t scheme = { .tag = scheme_tag };
-    proxy_string_t path, authority, query;
-    proxy_string_set(&path, path_str);
-    proxy_string_set(&authority, authority_str);
-    proxy_string_set(&query, query_str);
+    wasi_http_0_2_0_rc_2023_11_10_types_own_fields_t headers;
+    wasi_http_0_2_0_rc_2023_11_10_types_header_error_t err;
+    if (!wasi_http_0_2_0_rc_2023_11_10_types_static_fields_from_list(&headers_list, &headers, &err)) {
+        printf("Header create failed\n");
+    }
 
-    default_outgoing_http_outgoing_request_t req = types_new_outgoing_request(&method, &path, &query, &scheme, &authority, headers);
-    default_outgoing_http_future_incoming_response_t res;
+    wasi_http_0_2_0_rc_2023_11_10_types_method_t method = { .tag = method_tag };
+    wasi_http_0_2_0_rc_2023_11_10_types_scheme_t scheme = { .tag = scheme_tag };
+    wasi_string_t path_query, authority;
+    wasi_string_set(&path_query, path_query_str);
+    wasi_string_set(&authority, authority_str);
 
-    if (req == 0) {
+    wasi_http_0_2_0_rc_2023_11_10_types_own_outgoing_body_t out_body;
+
+    wasi_http_0_2_0_rc_2023_11_10_types_own_outgoing_request_t req = wasi_http_0_2_0_rc_2023_11_10_types_constructor_outgoing_request(headers);
+    bool ok = wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_request_set_method(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_request(req), &method) &&
+        wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_request_set_path_with_query(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_request(req), &path_query) &&
+        wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_request_set_scheme(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_request(req), &scheme) &&
+        wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_request_set_authority(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_request(req), &authority) &&
+        wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_request_body(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_request(req), &out_body);
+
+    if (!ok) {
         printf("Error creating request\n");
         return 4;
     }
     if (body != NULL) {
-        types_outgoing_stream_t ret;
-        if (!types_outgoing_request_write(req, &ret)) {
+        wasi_http_0_2_0_rc_2023_11_10_types_own_output_stream_t ret;
+        if (!wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_body_write(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_body(out_body), &ret)) {
             printf("Error getting output stream\n");
             return 7;
         }
-        streams_list_u8_t buf = {
+        wasi_io_0_2_0_rc_2023_11_10_streams_list_u8_t buf = {
             .ptr = (uint8_t *) body,
             .len = strlen(body),
         };
-        uint64_t ret_val;
-        streams_write(ret, &buf, &ret_val, NULL);
+        wasi_io_0_2_0_rc_2023_11_10_streams_stream_error_t stream_err;
+        // TODO check error here.
+        wasi_io_0_2_0_rc_2023_11_10_streams_method_output_stream_blocking_write_and_flush(wasi_io_0_2_0_rc_2023_11_10_streams_borrow_output_stream(ret), &buf, &stream_err);
+        wasi_io_0_2_0_rc_2023_11_10_streams_output_stream_drop_own(ret);
     }
 
-    res = default_outgoing_http_handle(req, NULL);
-    if (res == 0) {
+    wasi_http_0_2_0_rc_2023_11_10_outgoing_handler_own_future_incoming_response_t ret;
+    wasi_http_0_2_0_rc_2023_11_10_outgoing_handler_error_code_t handler_err;
+    if (!wasi_http_0_2_0_rc_2023_11_10_outgoing_handler_handle(req, NULL, &ret, &handler_err)) {
         printf("Error sending request\n");
-        return 5;
-    }
-    
-    types_result_incoming_response_error_t result;
-    if (!types_future_incoming_response_get(res, &result)) {
-        printf("failed to get value for incoming request\n");
-        return 1;
-    }
-
-    if (result.is_err) {
-        printf("response is error!\n");
         return 2;
     }
-    // poll_drop_pollable(res);
 
-    types_status_code_t code = types_incoming_response_status(result.val.ok);
+    wasi_http_0_2_0_rc_2023_11_10_types_error_code_t finish_err;
+    if (!wasi_http_0_2_0_rc_2023_11_10_types_static_outgoing_body_finish(out_body, NULL, &finish_err)) {
+        printf("Failed to finish body\n");
+        return 3;
+    }
+
+    wasi_http_0_2_0_rc_2023_11_10_types_own_pollable_t poll = wasi_http_0_2_0_rc_2023_11_10_types_method_future_incoming_response_subscribe(wasi_http_0_2_0_rc_2023_11_10_types_borrow_future_incoming_response(ret));
+    wasi_io_0_2_0_rc_2023_11_10_poll_method_pollable_block(wasi_io_0_2_0_rc_2023_11_10_poll_borrow_pollable(poll));
+
+    wasi_http_0_2_0_rc_2023_11_10_types_result_result_own_incoming_response_error_code_void_t result;
+    if (!wasi_http_0_2_0_rc_2023_11_10_types_method_future_incoming_response_get(wasi_http_0_2_0_rc_2023_11_10_types_borrow_future_incoming_response(ret), &result)) {
+        printf("failed to get value for incoming request\n");
+        return 4;
+    }
+
+    if (result.is_err || result.val.ok.is_err) {
+        printf("response is error!\n");
+        return 5;
+    }
+
+    wasi_io_0_2_0_rc_2023_11_10_poll_pollable_drop_own(poll);
+    wasi_http_0_2_0_rc_2023_11_10_types_future_incoming_response_drop_own(ret);
+
+    wasi_http_0_2_0_rc_2023_11_10_types_own_incoming_response_t resp = result.val.ok.val.ok;
+
+    wasi_http_0_2_0_rc_2023_11_10_types_status_code_t code = wasi_http_0_2_0_rc_2023_11_10_types_method_incoming_response_status(wasi_http_0_2_0_rc_2023_11_10_types_borrow_incoming_response(resp));
     *status_code = code;
 
-    *handle = result.val.ok;
-
-    types_drop_outgoing_request(req);
+    *handle = resp.__handle;
 
     return 0;
 }
 
 
-int http_req(int32_t method, int32_t scheme, MonoString *authority, MonoString *path, MonoString *query, MonoString *headers, MonoString *body, int *status_code, int *handle) {
+int http_req(int32_t method, int32_t scheme, MonoString *authority, MonoString *path_query, MonoString *headers, MonoString *body, int *status_code, int *handle) {
     char* authority_utf8 = mono_wasm_string_get_utf8(authority);
-    char* path_utf8 = mono_wasm_string_get_utf8(path);
-    char* query_utf8 = mono_wasm_string_get_utf8(query);
+    char* path_query_utf8 = mono_wasm_string_get_utf8(path_query);
     char* headers_utf8 = mono_wasm_string_get_utf8(headers);
     char* body_utf8 = mono_wasm_string_get_utf8(body);
     
-    request(method, scheme, authority_utf8, path_utf8, query_utf8, body_utf8, status_code, handle);
+    request(method, scheme, authority_utf8, path_query_utf8, body_utf8, status_code, handle);
 
     free(authority_utf8);
-    free(path_utf8);
-    free(query_utf8);
+    free(path_query_utf8);
     free(headers_utf8);
     free(body_utf8);
 
@@ -214,23 +248,46 @@ int http_req(int32_t method, int32_t scheme, MonoString *authority, MonoString *
 }
 
 MonoString* http_read_body(int handle) {
-    types_incoming_stream_t stream;
-    if (!types_incoming_response_consume(handle, &stream)) {
-        printf("stream is error!\n");
+    wasi_http_0_2_0_rc_2023_11_10_types_own_incoming_response_t resp = {
+        .__handle = handle,
+    };
+ 
+    wasi_http_0_2_0_rc_2023_11_10_types_own_incoming_body_t in_body;
+    if (!wasi_http_0_2_0_rc_2023_11_10_types_method_incoming_response_consume(wasi_http_0_2_0_rc_2023_11_10_types_borrow_incoming_response(resp), &in_body)) {
+        printf("body is error!\n");
+        return NULL;
+    }
+    wasi_io_0_2_0_rc_2023_11_10_streams_own_input_stream_t stream;
+    if (!wasi_http_0_2_0_rc_2023_11_10_types_method_incoming_body_stream(wasi_http_0_2_0_rc_2023_11_10_types_borrow_incoming_body(in_body), &stream)) {
+        printf("stream is error\n");
         return NULL;
     }
 
-    int32_t len = 64 * 1024;
-    streams_tuple2_list_u8_bool_t body_res;
-    streams_stream_error_t err;
-    if (!streams_read(stream, len, &body_res, &err)) {
-        printf("BODY read is error!\n");
-        return NULL;
-    }
-    printf("data from read: %s\n", body_res.f0.ptr);
-    MonoString* result = mono_wasm_string_from_js((const char*)body_res.f0.ptr);
-    streams_tuple2_list_u8_bool_free(&body_res);
+    wasi_io_0_2_0_rc_2023_11_10_streams_own_pollable_t stream_poll = wasi_io_0_2_0_rc_2023_11_10_streams_method_input_stream_subscribe(wasi_io_0_2_0_rc_2023_11_10_streams_borrow_input_stream(stream));
 
+    int32_t len = 1024 * 1024;
+    char buff[len + 1];
+    int32_t offset = 0;
+    while (true) {
+        wasi_io_0_2_0_rc_2023_11_10_poll_method_pollable_block(wasi_io_0_2_0_rc_2023_11_10_poll_borrow_pollable(stream_poll));
+        wasi_io_0_2_0_rc_2023_11_10_streams_list_u8_t body_res;
+        wasi_io_0_2_0_rc_2023_11_10_streams_stream_error_t stream_err;
+        if (wasi_io_0_2_0_rc_2023_11_10_streams_method_input_stream_read(wasi_io_0_2_0_rc_2023_11_10_streams_borrow_input_stream(stream), len, &body_res, &stream_err)) {
+            strncpy(buff + offset, (char *) body_res.ptr, body_res.len);
+            buff[offset + body_res.len] = 0;
+            offset = offset + body_res.len;
+        } else if (stream_err.tag == WASI_IO_0_2_0_RC_2023_11_10_STREAMS_STREAM_ERROR_CLOSED) {
+            break;
+        } else {
+            printf("BODY read is error!\n");
+            return 6;
+        }
+        wasi_io_0_2_0_rc_2023_11_10_streams_list_u8_free(&body_res);
+    }
+    MonoString* result = mono_wasm_string_from_js((const char*)buff);
+
+    // wasi_http_0_2_0_rc_2023_11_10_types_outgoing_request_drop_own(req);
+    // wasi_io_0_2_0_rc_2023_11_10_streams_input_stream_drop_own(stream);
     return result;
 }
 
@@ -240,9 +297,12 @@ MonoString* http_read_headers_all(int handle) {
     char buffer[1024 * 1024];
     size_t written = 0;
 
-    types_headers_t header_handle = types_incoming_response_headers(handle);
-    types_list_tuple2_string_string_t header_list;
-    types_fields_entries(header_handle, &header_list);
+    wasi_http_0_2_0_rc_2023_11_10_types_own_incoming_response_t resp = {
+        .__handle = handle,
+    };
+    wasi_http_0_2_0_rc_2023_11_10_types_own_headers_t header_handle = wasi_http_0_2_0_rc_2023_11_10_types_method_incoming_response_headers(wasi_http_0_2_0_rc_2023_11_10_types_borrow_incoming_response(resp));
+    wasi_http_0_2_0_rc_2023_11_10_types_list_tuple2_field_key_field_value_t header_list;
+    wasi_http_0_2_0_rc_2023_11_10_types_method_fields_entries(wasi_http_0_2_0_rc_2023_11_10_types_borrow_fields(header_handle), &header_list);
 
     for (int i = 0; i < header_list.len && written < 1024 * 1023; i++) {
         char name[128];
@@ -254,6 +314,7 @@ MonoString* http_read_headers_all(int handle) {
         written += sprintf(&(buffer[written]), "%s: %s\n", name, value);
     }
     buffer[written] = 0;
+    wasi_http_0_2_0_rc_2023_11_10_types_fields_drop_own(header_handle);
     
     return mono_wasm_string_from_js(&buffer[0]);
 }
@@ -276,7 +337,10 @@ void wasi_queuecallback() {
 }
 
 void handle_close(int handle) {
-    types_drop_incoming_response(handle);
+    wasi_http_0_2_0_rc_2023_11_10_types_own_incoming_response_t resp = {
+        .__handle = handle,
+    };
+    wasi_http_0_2_0_rc_2023_11_10_types_incoming_response_drop_own(resp);
 }
 
 void wasi_http_attach_internal_calls() {
@@ -291,4 +355,13 @@ void wasi_http_attach_internal_calls() {
 
     mono_add_internal_call("Wasi.Http.WasiHttpExperimental::CreateResponse", create_response);
 
+}
+
+bool exports_wasi_cli_0_2_0_rc_2023_11_10_run_run(void) {
+    // TODO: actually get arguments here.
+    int argc = 1;
+    char argv[] = {
+        "dotnet"
+    };
+    return !main(argc, &argv);
 }

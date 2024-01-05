@@ -191,7 +191,7 @@ namespace Wasi.Http
                 WasiHttpExperimental.Method method = GetMethod(request);
                 WasiHttpExperimental.Scheme scheme = GetScheme(request);
 
-                int err = WasiHttpExperimental.Req(method, scheme, request.RequestUri.Authority, request.RequestUri.LocalPath, request.RequestUri.Query, headers, body, &statusCode, &handle);
+                int err = WasiHttpExperimental.Req(method, scheme, request.RequestUri.Authority, request.RequestUri.LocalPath + request.RequestUri.Query, headers, body, &statusCode, &handle);
                 if (err != 0)
                 {
                     throw new HttpRequestException(err.ToString());
