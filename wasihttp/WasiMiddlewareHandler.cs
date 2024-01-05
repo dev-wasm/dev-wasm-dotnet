@@ -1,29 +1,31 @@
+using System.Reflection.Metadata;
+using Microsoft.AspNetCore.Diagnostics;
+
 namespace Wasi.Http;
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Features;
-using System.Text;
-using Microsoft.VisualBasic;
+public class HttpResponse {
+
+    public HttpResponse(int StatusCode, string Body) {
+        this.StatusCode = StatusCode;
+        this.Body = Body;
+    }
+
+    public int StatusCode { get; }
+    public string Body { get; }
+}
 
 public class WasiMiddlewareHandler {
 
-    public delegate HttpResponseFeature HandlerDelegate(HttpRequestFeature req);
+    public delegate HttpResponse HttpHandler(string authority, string path, string method);
 
-    public static HandlerDelegate Handler;
+    public static HttpHandler Handler;
 
     public static void Handle(uint req, uint res, string authority, string path, string method) {
-        var request = new HttpRequestFeature();
-        request.Path = path;
-        request.Method = method;
-        var response = Handler(request);
+        var response = Handler(authority, path, method);
         var values = new string[2];
-        values[0] = response.Headers.ContentType!;
-        values[1] = response.Headers.Server!;
+        values[0] = "text/plain";
+        values[1] = "Dotnet + WASI";
 
-        var reader = new StreamReader(response.Body);
-        var body = reader.ReadToEnd();
-        
-        WasiHttpExperimental.CreateResponse(res, (uint) response.StatusCode, new string[]{"Content-type", "Server"}, values, body);
+        WasiHttpExperimental.CreateResponse(res, (uint) response.StatusCode, new string[]{"Content-type", "Server"}, values, response.Body);
     }
 }
