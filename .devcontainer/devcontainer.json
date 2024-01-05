@@ -5,6 +5,9 @@
 	    "PATH": "${containerEnv:PATH}:/usr/local/lib/wasi-sdk-20.0/bin:/usr/local/lib",
         "WASI_SDK_PATH": "/usr/local/lib/wasi-sdk-20.0"
     },
+    "containerEnv": {
+        "WASI_SDK_PATH": "/usr/local/lib/wasi-sdk-20.0"
+    },
     "features": {
         "devwasm.azurecr.io/dev-wasm/dev-wasm-feature/wasmtime-wasi:0.0.13": {
             "version": "20",

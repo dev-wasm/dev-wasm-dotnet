@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.Features;
 using Wasi.Http;
 
 // TODO: I can't seem to make namespaced classes work right, I think it's something on my understanding.
