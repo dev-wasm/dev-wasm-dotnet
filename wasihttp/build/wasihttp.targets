@@ -1,8 +1,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup>
         <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)..\native\wasi_http.c" />
-        <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)..\native\proxy.c" />
-        <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)..\native\proxy_component_type.o" />
+        <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)..\native\wasi.c" />
+        <!-- <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)..\native\wasi_component_type.o" /> -->
         <WasiAfterRuntimeLoaded Include="wasi_http_attach_internal_calls" />
 	</ItemGroup>
 </Project>
