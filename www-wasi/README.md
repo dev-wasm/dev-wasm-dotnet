@@ -8,11 +8,9 @@ dotnet build
 ```
 
 ## Running
-This requires `wasirun` so you need to run `go get github.com/stealthrocket/wasi-go`.
-
 ```sh
 # Run the server
-wasirun --http-server-addr localhost:8080 --http v1 bin/Debug/net7.0/www-wasi.wasm
+make run
 
 # Connect to the server
 curl localhost:8080
