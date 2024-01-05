@@ -49,6 +49,9 @@ MonoString* mono_wasm_string_from_proxy_string(wasi_string_t str) {
 }
 
 void exports_wasi_http_0_2_0_rc_2023_11_10_incoming_handler_handle(exports_wasi_http_0_2_0_rc_2023_11_10_incoming_handler_own_incoming_request_t req, exports_wasi_http_0_2_0_rc_2023_11_10_incoming_handler_own_response_outparam_t response_out) {
+    // This is necessary to initialize dotnet. Figure out a better way to do this.
+    exports_wasi_cli_0_2_0_rc_2023_11_10_run_run();
+    
     wasi_string_t authority;
     wasi_http_0_2_0_rc_2023_11_10_types_method_incoming_request_authority(wasi_http_0_2_0_rc_2023_11_10_types_borrow_incoming_request(req), &authority);
     MonoString *authority_string = mono_wasm_string_from_proxy_string(authority);
@@ -63,15 +66,13 @@ void exports_wasi_http_0_2_0_rc_2023_11_10_incoming_handler_handle(exports_wasi_
     wasi_http_0_2_0_rc_2023_11_10_types_method_incoming_request_method(wasi_http_0_2_0_rc_2023_11_10_types_borrow_incoming_request(req), &method);
     MonoString* method_string = mono_wasm_string_from_js(str_for_method(method));
 
-    // types_headers_t headers = types_incoming_request_headers(req);
-    // print_headers(headers);
-
     void* method_params[] = { &req.__handle, &response_out.__handle, authority_string, path_string, method_string };
+
     serve_http(NULL, method_params);
 }
 
 void create_response(uint32_t res_ptr, uint32_t status_code, MonoArray* headers, MonoArray* header_values, MonoString* mono_body) {
-    const char* body = mono_wasm_string_get_utf8(mono_body);
+    const char* body_str = mono_wasm_string_get_utf8(mono_body);
 
     uint32_t header_count = mono_array_length(headers);
     wasi_http_0_2_0_rc_2023_11_10_types_tuple2_field_key_field_value_t *header_arr = malloc(sizeof(wasi_http_0_2_0_rc_2023_11_10_types_tuple2_field_key_field_value_t) * header_count);
@@ -86,10 +87,10 @@ void create_response(uint32_t res_ptr, uint32_t status_code, MonoArray* headers,
         char* value_str = mono_wasm_string_get_utf8(value);
 
         header_arr[i].f0.ptr = name_str;
-        header_arr[i].f0.len = strlen(name_str) - 1;
+        header_arr[i].f0.len = strlen(name_str);
 
         header_arr[i].f1.ptr = value_str;
-        header_arr[i].f1.len = strlen(value_str) - 1;
+        header_arr[i].f1.len = strlen(value_str);
 
         // TODO there's definitely memory leaks here.
     }
@@ -101,7 +102,7 @@ void create_response(uint32_t res_ptr, uint32_t status_code, MonoArray* headers,
     wasi_http_0_2_0_rc_2023_11_10_types_own_outgoing_response_t res = wasi_http_0_2_0_rc_2023_11_10_types_constructor_outgoing_response(f);
 
     wasi_http_0_2_0_rc_2023_11_10_types_own_outgoing_body_t out_body;
-    wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_response_body(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_response(res), &body);
+    wasi_http_0_2_0_rc_2023_11_10_types_method_outgoing_response_body(wasi_http_0_2_0_rc_2023_11_10_types_borrow_outgoing_response(res), &out_body);
 
     wasi_http_0_2_0_rc_2023_11_10_types_own_response_outparam_t outparam = {
         .__handle = res_ptr,
@@ -114,7 +115,7 @@ void create_response(uint32_t res_ptr, uint32_t status_code, MonoArray* headers,
     };
     wasi_http_0_2_0_rc_2023_11_10_types_static_response_outparam_set(outparam, &res_err);
     
-    if (!res_err.is_err) {
+    if (res_err.is_err) {
         printf("Failed to set response outparam: %d -> %d\n", res_err.val.err, res);
     }
 
@@ -124,8 +125,8 @@ void create_response(uint32_t res_ptr, uint32_t status_code, MonoArray* headers,
     }
 
     wasi_io_0_2_0_rc_2023_11_10_streams_list_u8_t buf = {
-        .ptr = (uint8_t *) body,
-        .len = strlen(body),
+        .ptr = (uint8_t *) body_str,
+        .len = strlen(body_str),
     };
     wasi_io_0_2_0_rc_2023_11_10_streams_stream_error_t stream_err;
     wasi_io_0_2_0_rc_2023_11_10_streams_method_output_stream_blocking_write_and_flush(wasi_io_0_2_0_rc_2023_11_10_streams_borrow_output_stream(stream), &buf, &stream_err);
@@ -363,5 +364,5 @@ bool exports_wasi_cli_0_2_0_rc_2023_11_10_run_run(void) {
     char argv[] = {
         "dotnet"
     };
-    return !main(argc, &argv);
+    return !main(argc, (char**) &argv);
 }
