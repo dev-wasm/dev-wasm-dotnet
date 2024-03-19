@@ -13,7 +13,7 @@
         },
         "ghcr.io/devcontainers/features/common-utils": {}
     },
-    "postCreateCommand": "apt-get install -y libxml2 && dotnet workload install wasi-experimental",
+    "postCreateCommand": "apt-get install -y libxml2",
     "customizations": {
         "vscode": {
 	    "extensions": [ "ms-dotnettools.csharp" ]

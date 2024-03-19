@@ -8,7 +8,7 @@ public class HttpWasmServer {
             Console.WriteLine(path);
             Console.WriteLine(method);
 
-            var response = new HttpResponse(200, "This is a new test!");
+            var response = new HttpResponse(201, "This is a new test!");
             // response.Headers["Content-type"] = "text/plain";
             // response.Headers["Server"] = "aspdotnet-wasm";
 

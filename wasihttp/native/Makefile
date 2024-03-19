@@ -1,11 +1,14 @@
-.phony: gen clean run
+.phony: clean
 
-default: wasi-http
+default: libwasihttp.a
 
-wasi-http: ; git clone https://github.com/WebAssembly/wasi-http; cd wasi-http; git checkout v0.2.0-rc-2023-11-10 ; cd ../ ; cp wasi.wit wasi-http/wit
+wasi-http: ; git clone https://github.com/WebAssembly/wasi-http; cd wasi-http; git checkout v0.2.0 ; cd ../ ; cp wasi.wit wasi-http/wit
 
-# Note that this doesn't quite work right there's a bug in wit-bindgen 0.4.0 that missing a C definition
-# it is fixed in later versions, but they don't understand this wit syntax *bleeding-edge*
-gen: wasi-http ; wit-bindgen c ${PWD}/wasi-http/wit -w wasi
+libwasihttp.a:
+	wget https://github.com/dev-wasm/dev-wasm-c/releases/download/0.2.0/libwasihttp-0.2.0.tgz
+	tar -xvzf libwasihttp-0.2.0.tgz
+	rm libwasihttp-0.2.0.tgz
+	cat wasi_http.h | grep -v '#include "client.h"' > wasi_http.h.fixed
+	mv wasi_http.h.fixed wasi_http.h
 
-clean: ; rm -rf wasi-http
+clean: ; rm -f libwasihttp.a wasi_http.h
