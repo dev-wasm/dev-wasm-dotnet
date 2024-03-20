@@ -1,10 +1,15 @@
-.phony: clean run
+.phony: clean run gen
 
 clean:
 	dotnet clean
-	rm main*.wasm wasi_snapshot_preview1.reactor.wasm
+	rm -f main*.wasm wasi_snapshot_preview1.reactor.wasm
+	make -C ../wasihttp/native clean
 
-bin/Debug/net7.0/www-wasi.wasm: Program.cs www-wasi.csproj
+gen:
+	make -C ../wasihttp/native libwasihttp.a
+	make -C ../wasihttp/native wasi-http
+
+bin/Debug/net7.0/www-wasi.wasm: Program.cs www-wasi.csproj gen
 	dotnet build
 
 wasi_snapshot_preview1.reactor.wasm: ; wget https://github.com/bytecodealliance/wasmtime/releases/download/v18.0.2/wasi_snapshot_preview1.reactor.wasm

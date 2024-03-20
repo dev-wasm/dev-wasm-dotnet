@@ -4,11 +4,11 @@ default: libwasihttp.a
 
 wasi-http: ; git clone https://github.com/WebAssembly/wasi-http; cd wasi-http; git checkout v0.2.0 ; cd ../ ; cp wasi.wit wasi-http/wit
 
-libwasihttp.a:
-	wget https://github.com/dev-wasm/dev-wasm-c/releases/download/0.2.2/libwasihttp-0.2.2.tgz
-	tar -xvzf libwasihttp-0.2.2.tgz
-	rm libwasihttp-0.2.2.tgz
-	cat wasi_http.h | grep -v '#include "client.h"' > wasi_http.h.fixed
-	mv wasi_http.h.fixed wasi_http.h
+wasihttp_version := 0.2.3
 
-clean: ; rm -f libwasihttp.a wasi_http.h
+libwasihttp.a:
+	wget https://github.com/dev-wasm/dev-wasm-c/releases/download/$(wasihttp_version)/libwasihttp-$(wasihttp_version).tgz
+	tar -xvzf libwasihttp-$(wasihttp_version).tgz
+	rm libwasihttp-$(wasihttp_version).tgz
+
+clean: ; rm -f libwasihttp.a wasi_http.h; rm -rf wasi-http
