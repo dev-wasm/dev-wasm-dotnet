@@ -1,4 +1,5 @@
 using Wasi.Http;
+using System;
 using System.Text;
 
 public class HttpWasmServer {

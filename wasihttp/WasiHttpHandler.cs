@@ -2,9 +2,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Security;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Wasi.Http
 {
@@ -151,7 +156,7 @@ namespace Wasi.Http
             int handle;
             string body = "";
             string headers = "";
-            int headerCount = request.Headers.Count() + request.Content?.Headers.Count() ?? 0;
+            // int headerCount = request.Headers.Count() + request.Content?.Headers.Count() ?? 0;
 
             if (request.Content != null)
             {
@@ -163,7 +168,7 @@ namespace Wasi.Http
                 throw new InvalidOperationException();
             }
 
-            List<string> headerList = new List<string>(headerCount);
+            List<string> headerList = new List<string>();
 
             foreach (KeyValuePair<string, IEnumerable<string>> header in request.Headers)
             {

@@ -1,6 +1,3 @@
-using System.Reflection.Metadata;
-using Microsoft.AspNetCore.Diagnostics;
-
 namespace Wasi.Http;
 
 public class HttpResponse {

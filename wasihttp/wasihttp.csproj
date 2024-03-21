@@ -2,12 +2,21 @@
 
     <PropertyGroup>
       <OutputType>library</OutputType>
-      <TargetFramework>net7.0</TargetFramework>
+      <TargetFramework>net8.0</TargetFramework>
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
-
+<!--
+  <PropertyGroup>
+    <OutputType>library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
+    <PublishTrimmed>true</PublishTrimmed>
+    <WasmSingleFileBundle>true</WasmSingleFileBundle>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+-->
     <!--
     <ItemGroup>
 		  <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)\wasi_http_native.c" />
@@ -16,13 +25,16 @@
 		</ItemGroup>
     -->
 
+<!--
     <ItemGroup>
       <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
-
+-->
+    <!--
     <ItemGroup>
       <PackageReference Include="Wasi.Sdk" Version="0.1.4-preview.10020" />
     </ItemGroup>
+    -->
 
     <ItemGroup>
       <UpToDateCheckInput Include="native\*.c" />
