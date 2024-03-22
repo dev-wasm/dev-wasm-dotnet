@@ -20,6 +20,7 @@
     <OutputType>Exe</OutputType>
     <PublishTrimmed>true</PublishTrimmed>
     <WasmSingleFileBundle>true</WasmSingleFileBundle>
+    <WasiExperimentalWorkload>true</WasiExperimentalWorkload>
   </PropertyGroup>
   
     <ItemGroup>

@@ -5,6 +5,6 @@
 
         <!-- <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)..\native\wasi.c" /> -->
         <!-- <WasiNativeFileReference Include="$(MSBuildThisFileDirectory)..\native\wasi_component_type.o" /> -->
-        <WasiAfterRuntimeLoaded Include="wasi_http_attach_internal_calls" />
+        <!-- <WasiAfterRuntimeLoaded Include="wasi_http_attach_internal_calls" /> -->
 	</ItemGroup>
 </Project>
